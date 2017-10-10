@@ -1,37 +1,37 @@
-# ![Assessment 2][banner]
+# Title
 
-This repository can be forked for [**assessment 2**][a2] of [frontend 3][fe3]
-at [**@CMDA**][cmda].
 
-## TODO
+![][]
 
-*   [ ] [GitHub Pages](#github-pages)
-*   [ ] [Metadata](#metadata)
-*   [ ] [Issues](#issues)
-*   [ ] Replace this document in your fork with your own readme!
+## Description
 
-## GitHub Pages
 
-Set up [GitHub Pages][pages] for this fork through the **Settings** pane.  Use
-the **Master branch** as its source.  Do not choose a Jekyll template.
+## Data
+The data has been taken from [CBS][dataSource]. The data is called *Deaths; underlying cause of death (shortlist), sex, age*
+in The Netherlands ... . . . . .. . . 
 
-## Metadata
+## How the data was cleaned
 
-Edit the **description** and **url** of your repository.  Click on edit above
-the green Clone or download button and fill in a correct description and use the
-`github.io` URL you just set up.
+## The interactivity
 
-## Issues
+## Features
+- [d3-selection][selectionLink]
 
-Enable issues so we can give feedback by going to the settings tab of your fork
-and checking the box next to `issues`.
 
-[banner]: https://cdn.rawgit.com/cmda-fe3/logo/a4b0614/banner-assessment-2.svg
 
-[a2]: https://github.com/cmda-fe3/course-17-18/tree/master/assessment-2#description
 
-[fe3]: https://github.com/cmda-fe3
+## License
+[GPL-3.0][license] © Kang Yun Wang (Kevin Wang)
 
-[cmda]: https://github.com/cmda
 
-[pages]: https://pages.github.com
+
+[license]: https://opensource.org/licenses/MIT
+[dataSource]: http://statline.cbs.nl/statweb/publication/?vw=t&dm=slen&pa=7052eng&la=en
+
+[selectionLink]: https://github.com/d3/d3-selection
+[scaleLink]: https://github.com/d3/d3-scale
+[hierarchyLink]: https://github.com/d3/d3-hierarchy
+[numberFormat]: https://github.com/d3/d3-format 
+[transitionLink]: https://github.com/d3/d3-transition 
+
+[previewImg]: previewImg.png
