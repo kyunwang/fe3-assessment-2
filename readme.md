@@ -11,6 +11,10 @@ The data has been taken from [CBS][dataSource]. The data is called *Deaths; unde
 in The Netherlands ... . . . . .. . . 
 
 ## How the data was cleaned
+- Check what parts weren't needed. Part of the header and copyright in the footer.
+- Remove unnecessaty characters
+- Remove the header with regex
+- Parse to CSV and return a self structured object
 
 ## The interactivity
 
