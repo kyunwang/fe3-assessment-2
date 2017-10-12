@@ -25,3 +25,7 @@ text {
 .domain, .tick line {
 	stroke: #fff;
 }
+
+.axis .tick line {
+	display: none;
+}

@@ -181,11 +181,16 @@ function onload(err, doc) {
 
 	function render(data) {
 		let dataF = data.filter(item => item.cause === activeChart)
-
+		
+		// let chartBars = container.selectAll('.bar')
+			// .data(dataF);
 		let chartBars = container.selectAll('.bar')
-			.data(dataF);
+			.data(dataF)
+			.enter()
+			.append('rect')
+			.attr('class', 'bar');
 
-		let transition = container.transition()
+		let transContainer = container.transition()
 			.duration(transDur);
 
 		// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
@@ -193,24 +198,21 @@ function onload(err, doc) {
 		maxDeaths = d3.max(dataF, data => data.deaths);
 		
 		// Update the domain of the yScale & colorScale
-		darkColors.domain([minDeaths, maxDeaths])
+		darkColors.domain([minDeaths, maxDeaths]);
 		yScale.domain([maxDeaths, 0]);
 
 
-		transition.select('.axis-y')
+		transContainer.select('.axis-y')
 			.call(d3.axisLeft(yScale))
 			.selectAll('g');
 
-		chartBars.enter()
-			.append('rect')
+		transContainer.selectAll('.bar')
 				.attr('x', dataF => translateX + xScale(dataF.year))
 				.attr('y', dataF => yScale(dataF.deaths) - translateY)
 				// .attr('y', dataF => svgHeight - translateY - yScale(dataF.deaths))
 				.attr('width', dataF => xScale.bandwidth())
 				.attr('height', dataF => svgHeight - yScale(dataF.deaths))
 				.attr('fill', dataF => darkColors(dataF.deaths))
-
-		chartBars.exit().remove()
 	}
 
 }
