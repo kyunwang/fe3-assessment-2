@@ -1,0 +1,27 @@
+html {
+	height: 100%;
+}
+
+body {
+	background-color: #000;
+	height: 100%;
+	margin: 0;
+}
+
+/*=================
+=== Start svg styling
+=================*/
+
+svg {
+	height: 80%;
+	width: 80%;
+	min-width: 480px;
+}
+
+text {
+	fill: #fff;
+}
+
+.domain, .tick line {
+	stroke: #fff;
+}
