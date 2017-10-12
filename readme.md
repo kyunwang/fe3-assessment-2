@@ -1,4 +1,4 @@
-# A Interactive barchart
+# Cleaning data and a interactive barchart
 
 A interactive barchart using data about *Deaths and underlying causes of death*.
 
