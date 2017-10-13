@@ -1,8 +1,8 @@
-let ourData;
-let useableData = [];
-let filteredData;
-let dataKeys = [];
-let activeChart;
+var ourData;
+var useableData = [];
+var filteredData;
+var dataKeys = [];
+var activeChart;
 
 d3.text('data.csv')
 	.get(onload);
@@ -26,8 +26,8 @@ const margin = {
 	right: 48,
 }
 
-let svgWidth;
-let svgHeight;
+var svgWidth;
+var svgHeight;
 
 const translateY = 0;
 const translateX = 50;
@@ -41,10 +41,10 @@ const darkColors = d3.scaleLinear()
 /*=================
 === Global variables 
 =================*/
-let minDeaths;
-let maxDeaths;
+var minDeaths;
+var maxDeaths;
 
-const transDur = 1500;
+const transDur = 500;
 const delayDur = 50;
 
 /*=================
@@ -100,7 +100,7 @@ function onload(err, doc) {
 
 		// Reformatting the data to a more usable one
 		ourData.map((d, i) => {
-			for(let i = 0; i < d.years.length; i++) {
+			for(var i = 0; i < d.years.length; i++) {
 				useableData.push({
 					cause: d.cause,
 					year: d.years[i],
@@ -110,30 +110,110 @@ function onload(err, doc) {
 		});
 
 		// Filtering the keys to use
-		for(let i = 0; i < useableData.length; i++) {
+		for(var i = 0; i < useableData.length; i++) {
 			dataKeys.push(useableData[i].cause);
 		}
 
-		// Filter from : https://stackoverflow.com/questions/16747798/delete-duplicate-elements-from-an-array
+		// Filter from : https://stackoverflow.com/questions/16747798/devare-duplicate-elements-from-an-array
 		dataKeys = dataKeys.filter((d, i, self) => i === self.indexOf(d));
 
 	/*=================
 	=== Add labels to our dropdown
 	=================*/
 		d3.select('#filter-list')
-			.on('change', changeChart)
-			.selectAll('option')
-			.data(dataKeys)
-			.enter()
-			.append('option')
-				.attr('value', label => label)
-				.text(label => label);
+		.on('change', changeChart)
+		.selectAll('option')
+		.data(dataKeys)
+		.enter()
+		.append('option')
+			.attr('value', label => label)
+			.text(label => label);
 
 		function changeChart() {
-			console.log(this.value);
 			activeChart = this.value;
+
+			// Add a transition on changing the cause - btw use style not .attr which does not work
+			labelCause.transition()
+				.duration(transDur)
+				.style('opacity', 0)
+				.transition()
+				.duration(transDur)
+				.style('opacity', 1)
+				.text(this.value)
+
 			renderCause(useableData);
 		}
+
+	/*=================
+	=== Render title
+	=================*/
+		var labelCon = d3.select('.con-title');
+		
+		// Create a html p tag to show the label of the active graph
+		var labelCause = labelCon.append('p')
+			.attr('class', 'large-text')
+			.text(dataKeys[0]);
+
+		// Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
+		var labelSvg = labelCon.append('svg');
+
+		// Append the counter
+		var labelCount = labelSvg.append('text')
+			.attr("x", 0)
+			.attr("y", 20)
+			.attr('class', 'counter-text')
+			.text(0);
+
+		// Append a label (DEATH)
+		var label = labelSvg.insert('text')
+			.attr('class', 'counter-text')
+			.attr("x", 70)
+			.attr("y", 20)
+			.text('DEATHS');
+
+		// Append the selected year
+		var labelYear = labelSvg.insert('text')
+			.attr('class', 'counter-text')
+			.attr("x", 170)
+			.attr("y", 20);
+
+	/*=================
+	=== Handle mouse events
+	=================*/
+		var formatNumber = d3.format(".3s");
+
+		function handleMouseOver(d) {
+			labelCount.transition()
+				.duration(transDur)
+				.tween("text", function() { // Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
+					var i = d3.interpolate(0, d.deaths); // interpolate from 0 to the amounts of death fromt he hovered item
+					return t => d3.select(this).text(formatNumber(i(t)));
+				});
+			
+			// Fade in the year
+			labelYear.style('opacity', 0)
+				.transition()
+				.duration(transDur)
+				.text(`IN ${d.year}`)
+				.style('opacity', 1);
+		}
+
+		function handleMouseOut(d) {
+			labelCount.transition()
+				.duration(transDur)
+				.tween("text", function() { // Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
+					var i = d3.interpolate(d.deaths, 0); // interpolate from up to down
+					return t => d3.select(this).text(formatNumber(i(t)));
+				});
+			
+			labelYear.style('opacity', 1)
+				.transition()
+				.duration(transDur)
+				.text(`IN ${d.year}`)
+				.style('opacity', 0)
+		}
+
+
 
 	/*=================
 	=== Start chart
@@ -149,7 +229,7 @@ function onload(err, doc) {
 		darkColors.domain([minDeaths, maxDeaths])
 
 		// Appending the x-axis
-		let xAxis = container.append('g') // Set and create the x-axis at the bottom
+		var xAxis = container.append('g') // Set and create the x-axis at the bottom
 			.attr('class', 'axis axis-x')
 			.attr('transform', `translate(${translateX}, ${svgHeight})`)
 			.call(d3.axisBottom(xScale))
@@ -160,7 +240,7 @@ function onload(err, doc) {
 			.style("text-anchor", "start");
 		
 		// Appending the y-axis
-		let yAxis = container.append('g') // Set and create the y-axis on the left
+		var yAxis = container.append('g') // Set and create the y-axis on the left
 			.attr('class', 'axis axis-y')
 			.attr('transform', `translate(${translateX}, ${0})`)
 			.call(d3.axisLeft(yScale));
@@ -173,7 +253,7 @@ function onload(err, doc) {
 			// filter on basis of what cause has been choses. Return All deaths on default
 			filteredData = data.filter(item => item.cause === (activeChart || dataKeys[0]));
 
-			let chartBars = container.selectAll('.bar')
+			var chartBars = container.selectAll('.bar')
 				.data(filteredData)
 				.enter()
 				.append('rect')
@@ -181,7 +261,7 @@ function onload(err, doc) {
 					.on('mouseleave', handleMouseOut)
 					.attr('class', 'bar');
 
-			let transContainer = container.transition()
+			var transContainer = container.transition()
 				.duration(transDur);
 
 			// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
@@ -211,7 +291,7 @@ function onload(err, doc) {
 		(function initialRender() {
 				filteredData = useableData.filter(item => item.cause === (activeChart || dataKeys[0]));
 
-				let chartBars = container.selectAll('.bar')
+				var chartBars = container.selectAll('.bar')
 					.data(filteredData)
 					.enter()
 					.append('rect')
@@ -222,7 +302,7 @@ function onload(err, doc) {
 				// It doesn't render without transition for some reason
 				// The data is already there too.
 				// settimeout doesn't work
-				let transContainer = container.transition()
+				var transContainer = container.transition()
 					.duration(0);
 		
 				// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
@@ -272,76 +352,6 @@ function onload(err, doc) {
 			return d3.axisLeft(yScale);
 		}
 
-	/*=================
-	=== Render title
-	=================*/
-		let labelCon = d3.select('.con-title');
-		
-		labelCon.append('p')
-		.attr('class', 'large-text')
-		.text(dataKeys[0]);
-	
-	
-		// Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
-		let labelSvg = labelCon.append('svg')
-		let labelCount = labelSvg.append('text')
-			.attr("x", 0)
-			.attr("y", 20)
-			.attr('class', 'counter-text')
-			.text(0);
-		let label = labelSvg.insert('text')
-			.attr('class', 'counter-text')
-			.attr("x", 80)
-			.attr("y", 20)
-			.text('DEATHS');
-		let labelYear = labelSvg.insert('text')
-			.attr('class', 'counter-text')
-			.attr("x", 180)
-			.attr("y", 20);
-				
-					
-	/*=================
-	=== handle mouse event
-	=================*/
-		function handleMouseOver(d) {
-			let formatPercent = d3.format(".3s");
-
-			labelCount.transition()
-				.duration(transDur)
-				.tween("text", function() { // Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
-					// let i = d3.interpolate(minDeaths, d.deaths);
-					let i = d3.interpolate(0, d.deaths);
-					return t => {
-						d3.select(this).text(formatPercent(i(t)));
-					};
-				});
-			
-			labelYear.attr('opacity', 0)
-				.transition()
-				.duration(transDur)
-				.text(`IN ${d.year}`)
-				.attr('opacity', 1);
-		}
-
-		function handleMouseOut(d) {
-			let formatPercent = d3.format(".3s");
-
-			labelCount.transition()
-				.duration(transDur)
-				.tween("text", function() { // Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
-					// let i = d3.interpolate(minDeaths, d.deaths);
-					let i = d3.interpolate(d.deaths, 0);
-					return t => {
-						d3.select(this).text(formatPercent(i(t)));
-					};
-				});
-			
-			labelYear.attr('opacity', 1)
-				.transition()
-				.duration(transDur)
-				.text(`IN ${d.year}`)
-				.attr('opacity', 0)
-		}
 
 	
 }
