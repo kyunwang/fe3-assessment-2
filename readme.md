@@ -85,7 +85,10 @@ The interactions are:
 	- [x] The filter
 
 - [ ] Set a inital year to *blank* in yearfilter
-- [ ] 
+- [ ] Sometimes a color wouldn't come through
+- [ ] Clean the cause labels
+
+- [ ] Refactoring - awfull safari...
 
 <!-- - [ ] Select a specific year and cause to compare? -->
 
