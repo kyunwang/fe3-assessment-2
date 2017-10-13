@@ -17,14 +17,14 @@ p,
 	margin: 0;
 }
 
-.medium-text {
-	font-size: 2em;
+.large-text {
+	font-size: 3em;
 	font-weight: 500;
 }
 
-.large-text {
-	font-size: 3em;
-	font-weight: 700;
+.medium-text {
+	font-size: 1.5em;
+	font-weight: 500;
 }
 
 .con,
@@ -32,55 +32,62 @@ select {
 	margin-left: 50px;	
 }
 
+select {
+	height: 29px;
+   overflow: hidden;
+   width: 240px;
+}
+
 /*=================
 === Start svg styling
 =================*/
 
-body > svg {
-	height: 80%;
-	width: 80%;
-	min-width: 480px;
-}
+	body > svg {
+		height: 70%;
+		width: 80%;
+		min-width: 480px;
+	}
 
-text {
-	fill: #fff;
-}
+	text {
+		fill: #fff;
+	}
 
-.domain, .tick line {
-	stroke: #fff;
-}
+	.domain, .tick line {
+		stroke: #fff;
+	}
 
-.axis .tick line {
-	display: none;
-}
+	.axis .tick line {
+		display: none;
+	}
 
-/* For the bar */
-.bar {
-	transition: fill .4s ease-in;
-}
+	/* For the bar */
+	.bar {
+		transition: fill .4s ease-in;
+	}
 
-.bar:hover {
-	fill: #ffd700;
-}
+	.bar:hover {
+		fill: #ffd700;
+	}
 
 /*=================
 === Title container
 =================*/
 
-.con > svg {
-	height: 3em;
-	width: 80%;
-	min-width: 480px;
-}
+	.con > svg {
+		height: 3em;
+		width: 80%;
+		min-width: 480px;
+	}
 
-.con path {
-	stroke: #fff;
-}
+	.con path {
+		stroke: #fff;
+	}
 
-.con text {
-	fill: #fff;
-}
+	.con text {
+		fill: #fff;
+	}
 
-.counter-text {
-	font-size: 1.5em;
-}
+	.counter-text {
+		font-size: 2.5em;
+		font-weight: 700;
+	}

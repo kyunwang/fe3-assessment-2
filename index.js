@@ -22,7 +22,7 @@ const getSemicolons = /;/g; // Get all ;
 const margin = {
 	top: 48,
 	bottom: 96,
-	left: 48,
+	left: 78,
 	right: 48,
 }
 
@@ -30,7 +30,7 @@ var svgWidth;
 var svgHeight;
 
 const translateY = 0;
-const translateX = 50;
+const translateX = 75;
 
 const xScale = d3.scaleBand()
 	.padding(0.2);
@@ -41,22 +41,23 @@ const darkColors = d3.scaleLinear()
 /*=================
 === Global variables 
 =================*/
-var minDeaths;
-var maxDeaths;
+	var minDeaths;
+	var maxDeaths;
 
-const transDur = 500;
-const delayDur = 50;
+	const transDur = 500;
+	const delayDur = 50;
 
-/*=================
-=== Setting our svg
-=================*/
-var svg = d3.select('#chart')
-	.attr('transform', `translate(${margin.left}, ${margin.top})`);
-var container = svg.append('g');
+	/*=================
+	=== Setting our svg
+	=================*/
+		var svg = d3.select('#chart')
+			.attr('transform', `translate(${margin.left}, ${margin.top})`);
+		var container = svg.append('g');
 
-function onload(err, doc) {
-	svgWidth = parseInt(svg.style('width'), 10) - margin.left - margin.right;
-	svgHeight = parseInt(svg.style('height'), 10) - margin.top - margin.bottom;
+		function onload(err, doc) {
+			svgWidth = parseInt(svg.style('width'), 10) - margin.left - margin.right;
+			svgHeight = parseInt(svg.style('height'), 10) - margin.top - margin.bottom;
+			
 	/*=================
 	=== Data cleaning script
 	=================*/
@@ -76,15 +77,8 @@ function onload(err, doc) {
 			return {
 				cause: d['Subjects_2'].replace(/\d+\s/g, ''), // Removes the digits and a space frmo the cause string
 				years: [
-					1950,
-					1960,
-					1970,
-					1980,
-					1990,
-					2000,
-					2010,
-					2015,
-				],
+					1950, 1960, 1970, 1980, 1990, 2000, 2010, 2015,
+				], 
 				deaths: [
 					parseInt(d[1950], 10),
 					parseInt(d[1960], 10),
@@ -121,13 +115,13 @@ function onload(err, doc) {
 	=== Add labels to our dropdown
 	=================*/
 		d3.select('#filter-list')
-		.on('change', changeChart)
-		.selectAll('option')
-		.data(dataKeys)
-		.enter()
-		.append('option')
-			.attr('value', label => label)
-			.text(label => label);
+			.on('change', changeChart)
+			.selectAll('option')
+			.data(dataKeys)
+			.enter()
+			.append('option')
+				.attr('value', label => label)
+				.text(label => label);
 
 		function changeChart() {
 			activeChart = this.value;
@@ -151,7 +145,7 @@ function onload(err, doc) {
 		
 		// Create a html p tag to show the label of the active graph
 		var labelCause = labelCon.append('p')
-			.attr('class', 'large-text')
+			.attr('class', 'medium-text')
 			.text(dataKeys[0]);
 
 		// Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
@@ -160,22 +154,22 @@ function onload(err, doc) {
 		// Append the counter
 		var labelCount = labelSvg.append('text')
 			.attr("x", 0)
-			.attr("y", 20)
+			.attr("y", 35)
 			.attr('class', 'counter-text')
 			.text(0);
 
 		// Append a label (DEATH)
 		var label = labelSvg.insert('text')
 			.attr('class', 'counter-text')
-			.attr("x", 70)
-			.attr("y", 20)
+			.attr("x", 130)
+			.attr("y", 35)
 			.text('DEATHS');
 
 		// Append the selected year
 		var labelYear = labelSvg.insert('text')
 			.attr('class', 'counter-text')
-			.attr("x", 170)
-			.attr("y", 20);
+			.attr("x", 300)
+			.attr("y", 35);
 
 	/*=================
 	=== Handle mouse events
@@ -261,6 +255,7 @@ function onload(err, doc) {
 					.on('mouseleave', handleMouseOut)
 					.attr('class', 'bar');
 
+			// Creating a container for transitions
 			var transContainer = container.transition()
 				.duration(transDur);
 
@@ -272,16 +267,25 @@ function onload(err, doc) {
 			darkColors.domain([minDeaths, maxDeaths]);
 			yScale.domain([maxDeaths, 0]);
 
+			// Update the y-axis
 			transContainer.select('.axis-y')
-				.call(getYScale)
+				.call(d3.axisLeft(yScale))
 				.selectAll('g');
 
+			// Updating the bar values
+			// First 'remove' the old values then add the new ones in place
 			transContainer.selectAll('.bar')
-				.attr('x', getX)
-				.attr('y', getY)
-				.attr('width', getWidth)
-				.attr('height', getHeight)
-				.attr('fill', getFill);
+				// Not adding for easier comparison
+				// .attr('height', 0)
+				// Need this to animate from up to down
+				// .attr('y', svgHeight)
+				.transition()
+				.duration(transDur)
+					.attr('x', getX)
+					.attr('y', getY)
+					.attr('width', getWidth)
+					.attr('height', getHeight)
+					.attr('fill', getFill);
 		}
 	
 
@@ -289,40 +293,40 @@ function onload(err, doc) {
 	=== Render first load
 	=================*/
 		(function initialRender() {
-				filteredData = useableData.filter(item => item.cause === (activeChart || dataKeys[0]));
+			filteredData = useableData.filter(item => item.cause === (activeChart || dataKeys[0]));
 
-				var chartBars = container.selectAll('.bar')
-					.data(filteredData)
-					.enter()
-					.append('rect')
-						.on('mouseenter', handleMouseOver)
-						.on('mouseleave', handleMouseOut)
-						.attr('class', 'bar');
-		
-				// It doesn't render without transition for some reason
-				// The data is already there too.
-				// settimeout doesn't work
-				var transContainer = container.transition()
-					.duration(0);
-		
-				// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
-				minDeaths = d3.min(filteredData, data => data.deaths);
-				maxDeaths = d3.max(filteredData, data => data.deaths);
-				
-				// Update the domain of the yScale & colorScale
-				darkColors.domain([minDeaths, maxDeaths]);
-				yScale.domain([maxDeaths, 0]);
-		
-				transContainer.select('.axis-y')
-					.call(getYScale)
-					.selectAll('g');
-		
-				transContainer.selectAll('.bar')
-					.attr('x', getX)
-					.attr('y', getY)
-					.attr('width', getWidth)
-					.attr('height', getHeight)
-					.attr('fill', getFill);
+			var chartBars = container.selectAll('.bar')
+				.data(filteredData)
+				.enter()
+				.append('rect')
+					.on('mouseenter', handleMouseOver)
+					.on('mouseleave', handleMouseOut)
+					.attr('class', 'bar');
+	
+			// It doesn't render without transition for some reason
+			// The data is already there too.
+			// settimeout doesn't work
+			var transContainer = container.transition()
+				.duration(0);
+	
+			// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
+			minDeaths = d3.min(filteredData, data => data.deaths);
+			maxDeaths = d3.max(filteredData, data => data.deaths);
+			
+			// Update the domain of the yScale & colorScale
+			darkColors.domain([minDeaths, maxDeaths]);
+			yScale.domain([maxDeaths, 0]);
+	
+			transContainer.select('.axis-y')
+				.call(getYScale)
+				.selectAll('g');
+	
+			transContainer.selectAll('.bar')
+				.attr('x', getX)
+				.attr('y', getY)
+				.attr('width', getWidth)
+				.attr('height', getHeight)
+				.attr('fill', getFill);
 		})()
 
 	/*=================
