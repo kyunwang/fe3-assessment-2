@@ -120,103 +120,69 @@ function onload(err, doc) {
 	/*=================
 	=== Add labels to our dropdown
 	=================*/
-	d3.select('#filterList')
-		.on('change', changeChart)
-		.selectAll('option')
-		.data(dataKeys)
-		.enter()
-		.append('option')
-			.attr('value', label => label)
-			.text(label => label);
+		d3.select('#filter-list')
+			.on('change', changeChart)
+			.selectAll('option')
+			.data(dataKeys)
+			.enter()
+			.append('option')
+				.attr('value', label => label)
+				.text(label => label);
 
-	function changeChart() {
-		console.log(this.value);
-		activeChart = this.value;
-		renderCause(useableData);
-	}
+		function changeChart() {
+			console.log(this.value);
+			activeChart = this.value;
+			renderCause(useableData);
+		}
 
 	/*=================
 	=== Start chart
 	=================*/
-	minDeaths = d3.min(useableData, data => data.deaths);
-	maxDeaths = d3.max(useableData, data => data.deaths);
+		minDeaths = d3.min(useableData, data => data.deaths);
+		maxDeaths = d3.max(useableData, data => data.deaths);
 
-	xScale.range([0, svgWidth])
-		.domain(useableData.map(d => d.year));
-	// Used map before and that didn't seem to work no matter what
-	yScale.range([0, svgHeight])
-		.domain([maxDeaths, 0]);
-	darkColors.domain([minDeaths, maxDeaths])
+		xScale.range([0, svgWidth])
+			.domain(useableData.map(d => d.year));
+		// Used map before and that didn't seem to work no matter what
+		yScale.range([0, svgHeight])
+			.domain([maxDeaths, 0]);
+		darkColors.domain([minDeaths, maxDeaths])
 
-	// Appending the x-axis
-	let xAxis = container.append('g') // Set and create the x-axis at the bottom
-		.attr('class', 'axis axis-x')
-		.attr('transform', `translate(${translateX}, ${svgHeight})`)
-		.call(d3.axisBottom(xScale))
-		.selectAll("text") // Setting the labels
-		.attr("y", 15)
-		.attr("x", -12)
-		.attr("dy", ".35em")
-		.style("text-anchor", "start");
-	
-	// Appending the y-axis
-	let yAxis = container.append('g') // Set and create the y-axis on the left
-		.attr('class', 'axis axis-y')
-		.attr('transform', `translate(${translateX}, ${0})`)
-		.call(d3.axisLeft(yScale));
-
-
-	function renderCause(data) {
-		// filter on basis of what cause has been choses. Return All deaths on default
-		filteredData = data.filter(item => item.cause === (activeChart || dataKeys[0]));
-
-		let chartBars = container.selectAll('.bar')
-			.data(filteredData)
-			.enter()
-			.append('rect')
-				.attr('class', 'bar')
-
-		let transContainer = container.transition()
-			.duration(transDur);
-
-		// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
-		minDeaths = d3.min(filteredData, data => data.deaths);
-		maxDeaths = d3.max(filteredData, data => data.deaths);
+		// Appending the x-axis
+		let xAxis = container.append('g') // Set and create the x-axis at the bottom
+			.attr('class', 'axis axis-x')
+			.attr('transform', `translate(${translateX}, ${svgHeight})`)
+			.call(d3.axisBottom(xScale))
+			.selectAll("text") // Setting the labels
+			.attr("y", 15)
+			.attr("x", -12)
+			.attr("dy", ".35em")
+			.style("text-anchor", "start");
 		
-		// Update the domain of the yScale & colorScale
-		darkColors.domain([minDeaths, maxDeaths]);
-		yScale.domain([maxDeaths, 0]);
+		// Appending the y-axis
+		let yAxis = container.append('g') // Set and create the y-axis on the left
+			.attr('class', 'axis axis-y')
+			.attr('transform', `translate(${translateX}, ${0})`)
+			.call(d3.axisLeft(yScale));
 
 
-		transContainer.select('.axis-y')
-			.call(getYScale)
-			.selectAll('g');
-
-		transContainer.selectAll('.bar')
-			.attr('x', getX)
-			.attr('y', getY)
-			.attr('width', getWidth)
-			.attr('height', getHeight)
-			.attr('fill', getFill);
-	}
-	
-
-	// Render on first load
-	(function initialRender() {
-			filteredData = useableData.filter(item => item.cause === (activeChart || dataKeys[0]));
+	/*=================
+	=== Render by filter
+	=================*/
+		function renderCause(data) {
+			// filter on basis of what cause has been choses. Return All deaths on default
+			filteredData = data.filter(item => item.cause === (activeChart || dataKeys[0]));
 
 			let chartBars = container.selectAll('.bar')
 				.data(filteredData)
 				.enter()
 				.append('rect')
-					.attr('class', 'bar')
-	
-			// It doesn't render without transition for some reason
-			// The data is already there too.
-			// settimeout doesn't work
+					.on('mouseover', handleMouseOver)
+					.attr('class', 'bar');
+
 			let transContainer = container.transition()
-				.duration(0);
-	
+				.duration(transDur);
+
 			// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
 			minDeaths = d3.min(filteredData, data => data.deaths);
 			maxDeaths = d3.max(filteredData, data => data.deaths);
@@ -224,19 +190,63 @@ function onload(err, doc) {
 			// Update the domain of the yScale & colorScale
 			darkColors.domain([minDeaths, maxDeaths]);
 			yScale.domain([maxDeaths, 0]);
-	
+
 			transContainer.select('.axis-y')
 				.call(getYScale)
 				.selectAll('g');
-	
+
 			transContainer.selectAll('.bar')
 				.attr('x', getX)
 				.attr('y', getY)
 				.attr('width', getWidth)
 				.attr('height', getHeight)
 				.attr('fill', getFill);
-	})()
+		}
+	
 
+	/*=================
+	=== Render first load
+	=================*/
+		(function initialRender() {
+				filteredData = useableData.filter(item => item.cause === (activeChart || dataKeys[0]));
+
+				let chartBars = container.selectAll('.bar')
+					.data(filteredData)
+					.enter()
+					.append('rect')
+						.on('mouseover', handleMouseOver)
+						.attr('class', 'bar');
+		
+				// It doesn't render without transition for some reason
+				// The data is already there too.
+				// settimeout doesn't work
+				let transContainer = container.transition()
+					.duration(0);
+		
+				// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
+				minDeaths = d3.min(filteredData, data => data.deaths);
+				maxDeaths = d3.max(filteredData, data => data.deaths);
+				
+				// Update the domain of the yScale & colorScale
+				darkColors.domain([minDeaths, maxDeaths]);
+				yScale.domain([maxDeaths, 0]);
+		
+				transContainer.select('.axis-y')
+					.call(getYScale)
+					.selectAll('g');
+		
+				transContainer.selectAll('.bar')
+					.attr('x', getX)
+					.attr('y', getY)
+					.attr('width', getWidth)
+					.attr('height', getHeight)
+					.attr('fill', getFill);
+				
+		})()
+
+	/*=================
+	=== Our broken up functions
+	=================*/
 	function getX(d) {
 		return translateX + xScale(d.year);
 	}
@@ -260,8 +270,72 @@ function onload(err, doc) {
 	function getYScale() {
 		return d3.axisLeft(yScale);
 	}
-	
 
+	/*=================
+	=== Render title
+	=================*/
+		let labelCon = d3.select('.con-title');
+		
+		labelCon.append('p')
+		.attr('class', 'large-text')
+		.text(dataKeys[0]);
+	
+	
+		// Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
+		let labelSvg = labelCon.append('svg')
+		let labelCount = labelSvg.append('text')
+			.attr("x", 0)
+			.attr("y", 20)
+			.attr('class', 'counter')
+		let label = labelSvg.insert('text')
+			.attr('class', 'counter')
+			.attr("x", 100)
+			.attr("y", 20)
+			.text('DEATHS')
+				
+					
+	/*=================
+	=== handle mouse event
+	=================*/
+	function handleMouseOver(d) {
+		let formatPercent = d3.format(".3s");
+
+		labelCount.transition()
+		.duration(transDur).tween("text", function() {
+			let i = d3.interpolate(minDeaths, d.deaths);
+			return t => {
+				d3.select(this).text(formatPercent(i(t)));
+			};
+		})
+
+	}
+
+	// check();
 	
 }
 
+
+function check() {
+	let labelCon = d3.select('.con-title');
+
+	labelCon.append('p')
+	.attr('class', 'large-text')
+	.text(dataKeys[0]);
+
+
+	// Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
+	labelCon
+		.append('svg')
+		.append('text')
+			.attr("x", 0)
+			.attr("y", 20)
+			.attr('class', 'counter')
+			.transition()
+			.duration(transDur)
+				.tween("text", function(d) {
+					var i = d3.interpolate(0, 100);
+					return t => {
+						d3.select(this).text(t);
+					};
+				});
+} 

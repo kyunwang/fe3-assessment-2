@@ -1,3 +1,5 @@
+**Still just a draft**
+
 # Cleaning data and a interactive barchart
 
 A interactive barchart using data about *Deaths and underlying causes of death*.
@@ -39,13 +41,31 @@ in The Netherlands ... . . . . .. . .
 
 ## The interactivity
 
+## What I've learned
+- the use of margins (Preventing overflows and stuff)
+- better understanding of dimensions(placement e.g. translate)
+- Cleaning data  (Man what a pain)
+- Understanding filtering data
+- 
+
+## What was hard
+- Cleaning the data
+- Changing the data (filtering)
+- Fixing svg/chart overflowing
+
 ## Features
 - [d3-selection][selectionLink]
 
 
 ## TODO
-- [ ] Filter on basis of what year, cause
-- [ ] Select a specific year and cause to compare?
+- [ ] Filter on basis of what year
+- [x] Filter on basis of what cause
+- [x] View a counter of the amounts of death
+- [ ] Basic styling
+	- [ ] The counter
+	- [ ] The filter
+<!-- - [ ] Select a specific year and cause to compare? -->
+
 
 ## License
 [GPL-3.0][license] © Kang Yun Wang (Kevin Wang)

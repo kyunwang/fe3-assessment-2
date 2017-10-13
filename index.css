@@ -9,11 +9,28 @@ body {
 	margin: 0;
 }
 
+p,
+.medium-text,
+.large-text {
+	color: #fff;
+	margin: 0;
+}
+
+.medium-text {
+	font-size: 2em;
+	font-weight: 500;
+}
+
+.large-text {
+	font-size: 3em;
+	font-weight: 700;
+}
+
 /*=================
 === Start svg styling
 =================*/
 
-svg {
+body > svg {
 	height: 80%;
 	width: 80%;
 	min-width: 480px;
@@ -29,4 +46,23 @@ text {
 
 .axis .tick line {
 	display: none;
+}
+
+
+.con > svg {
+	height: 3em;
+	width: 80%;
+	min-width: 480px;
+}
+
+.con path {
+	stroke: #fff;
+}
+
+.con text {
+	fill: #fff;
+}
+
+.counter {
+	font-size: 1.5em;
 }
