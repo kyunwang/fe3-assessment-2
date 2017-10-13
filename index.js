@@ -30,13 +30,13 @@ let svgWidth;
 let svgHeight;
 
 const translateY = 0;
-const translateX = 100;
+const translateX = 50;
 
 const xScale = d3.scaleBand()
 	.padding(0.2);
 const yScale = d3.scaleLinear();
 const darkColors = d3.scaleLinear()
-	.range([d3.rgb('white'), d3.rgb('silver')]);
+	.range([d3.rgb('#fff'), d3.rgb('#a7a165')]);
 
 /*=================
 === Global variables 
@@ -51,7 +51,7 @@ const delayDur = 50;
 === Setting our svg
 =================*/
 var svg = d3.select('#chart')
-	.attr('transform', `translate(${margin.left}, ${margin.top + margin.bottom})`);
+	.attr('transform', `translate(${margin.left}, ${margin.top})`);
 var container = svg.append('g');
 
 function onload(err, doc) {
@@ -177,7 +177,8 @@ function onload(err, doc) {
 				.data(filteredData)
 				.enter()
 				.append('rect')
-					.on('mouseover', handleMouseOver)
+					.on('mouseenter', handleMouseOver)
+					.on('mouseleave', handleMouseOut)
 					.attr('class', 'bar');
 
 			let transContainer = container.transition()
@@ -214,7 +215,8 @@ function onload(err, doc) {
 					.data(filteredData)
 					.enter()
 					.append('rect')
-						.on('mouseover', handleMouseOver)
+						.on('mouseenter', handleMouseOver)
+						.on('mouseleave', handleMouseOut)
 						.attr('class', 'bar');
 		
 				// It doesn't render without transition for some reason
@@ -241,35 +243,34 @@ function onload(err, doc) {
 					.attr('width', getWidth)
 					.attr('height', getHeight)
 					.attr('fill', getFill);
-				
 		})()
 
 	/*=================
 	=== Our broken up functions
 	=================*/
-	function getX(d) {
-		return translateX + xScale(d.year);
-	}
+		function getX(d) {
+			return translateX + xScale(d.year);
+		}
 
-	function getY(d) {
-		return yScale(d.deaths) - translateY;
-	}
+		function getY(d) {
+			return yScale(d.deaths) - translateY;
+		}
 
-	function getWidth() {
-		return xScale.bandwidth();
-	}
+		function getWidth() {
+			return xScale.bandwidth();
+		}
 
-	function getHeight(d) {
-		return svgHeight - yScale(d.deaths);
-	}
+		function getHeight(d) {
+			return svgHeight - yScale(d.deaths);
+		}
 
-	function getFill(d) {
-		return darkColors(d.deaths);
-	}
+		function getFill(d) {
+			return darkColors(d.deaths);
+		}
 
-	function getYScale() {
-		return d3.axisLeft(yScale);
-	}
+		function getYScale() {
+			return d3.axisLeft(yScale);
+		}
 
 	/*=================
 	=== Render title
@@ -286,56 +287,61 @@ function onload(err, doc) {
 		let labelCount = labelSvg.append('text')
 			.attr("x", 0)
 			.attr("y", 20)
-			.attr('class', 'counter')
+			.attr('class', 'counter-text')
+			.text(0);
 		let label = labelSvg.insert('text')
-			.attr('class', 'counter')
-			.attr("x", 100)
+			.attr('class', 'counter-text')
+			.attr("x", 80)
 			.attr("y", 20)
-			.text('DEATHS')
+			.text('DEATHS');
+		let labelYear = labelSvg.insert('text')
+			.attr('class', 'counter-text')
+			.attr("x", 180)
+			.attr("y", 20);
 				
 					
 	/*=================
 	=== handle mouse event
 	=================*/
-	function handleMouseOver(d) {
-		let formatPercent = d3.format(".3s");
+		function handleMouseOver(d) {
+			let formatPercent = d3.format(".3s");
 
-		labelCount.transition()
-		.duration(transDur).tween("text", function() {
-			let i = d3.interpolate(minDeaths, d.deaths);
-			return t => {
-				d3.select(this).text(formatPercent(i(t)));
-			};
-		})
-
-	}
-
-	// check();
-	
-}
-
-
-function check() {
-	let labelCon = d3.select('.con-title');
-
-	labelCon.append('p')
-	.attr('class', 'large-text')
-	.text(dataKeys[0]);
-
-
-	// Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
-	labelCon
-		.append('svg')
-		.append('text')
-			.attr("x", 0)
-			.attr("y", 20)
-			.attr('class', 'counter')
-			.transition()
-			.duration(transDur)
-				.tween("text", function(d) {
-					var i = d3.interpolate(0, 100);
+			labelCount.transition()
+				.duration(transDur)
+				.tween("text", function() { // Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
+					// let i = d3.interpolate(minDeaths, d.deaths);
+					let i = d3.interpolate(0, d.deaths);
 					return t => {
-						d3.select(this).text(t);
+						d3.select(this).text(formatPercent(i(t)));
 					};
 				});
-} 
+			
+			labelYear.attr('opacity', 0)
+				.transition()
+				.duration(transDur)
+				.text(`IN ${d.year}`)
+				.attr('opacity', 1);
+		}
+
+		function handleMouseOut(d) {
+			let formatPercent = d3.format(".3s");
+
+			labelCount.transition()
+				.duration(transDur)
+				.tween("text", function() { // Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
+					// let i = d3.interpolate(minDeaths, d.deaths);
+					let i = d3.interpolate(d.deaths, 0);
+					return t => {
+						d3.select(this).text(formatPercent(i(t)));
+					};
+				});
+			
+			labelYear.attr('opacity', 1)
+				.transition()
+				.duration(transDur)
+				.text(`IN ${d.year}`)
+				.attr('opacity', 0)
+		}
+
+	
+}

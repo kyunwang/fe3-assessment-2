@@ -61,9 +61,11 @@ in The Netherlands ... . . . . .. . .
 - [ ] Filter on basis of what year
 - [x] Filter on basis of what cause
 - [x] View a counter of the amounts of death
+- [ ] A tooltip? (needed with the counter?)
 - [ ] Basic styling
 	- [ ] The counter
 	- [ ] The filter
+
 <!-- - [ ] Select a specific year and cause to compare? -->
 
 

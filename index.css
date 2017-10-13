@@ -7,6 +7,7 @@ body {
 	background-color: #000;
 	height: 100%;
 	margin: 0;
+	margin-top: 1em;
 }
 
 p,
@@ -24,6 +25,11 @@ p,
 .large-text {
 	font-size: 3em;
 	font-weight: 700;
+}
+
+.con,
+select {
+	margin-left: 50px;	
 }
 
 /*=================
@@ -48,6 +54,18 @@ text {
 	display: none;
 }
 
+/* For the bar */
+.bar {
+	transition: fill .4s ease-in;
+}
+
+.bar:hover {
+	fill: #ffd700;
+}
+
+/*=================
+=== Title container
+=================*/
 
 .con > svg {
 	height: 3em;
@@ -63,6 +81,6 @@ text {
 	fill: #fff;
 }
 
-.counter {
+.counter-text {
 	font-size: 1.5em;
 }
