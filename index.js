@@ -1,5 +1,6 @@
 let ourData;
 let useableData = [];
+let filteredData;
 let dataKeys = [];
 let activeChart;
 
@@ -35,29 +36,23 @@ const xScale = d3.scaleBand()
 	.padding(0.2);
 const yScale = d3.scaleLinear();
 const darkColors = d3.scaleLinear()
-// .interpolate(d3.interpolateHcl) //Hue Chroma Luminence - Chose this because it gives a different colourscheme than rgb ^^
-.range([d3.rgb('red'),'green', d3.rgb('gray')]);
+	.range([d3.rgb('white'), d3.rgb('silver')]);
 
 /*=================
 === Global variables 
 =================*/
-
 let minDeaths;
 let maxDeaths;
 
-const transDur = 3000;
+const transDur = 1500;
 const delayDur = 50;
 
 /*=================
 === Setting our svg
 =================*/
 var svg = d3.select('#chart')
-	// .attr('width', svgWidth)
-	// .attr('height', svgHeight)
-	.attr('transform', `translate(${margin.left}, ${margin.top + margin.bottom})`)
-
+	.attr('transform', `translate(${margin.left}, ${margin.top + margin.bottom})`);
 var container = svg.append('g');
-
 
 function onload(err, doc) {
 	svgWidth = parseInt(svg.style('width'), 10) - margin.left - margin.right;
@@ -121,7 +116,6 @@ function onload(err, doc) {
 
 		// Filter from : https://stackoverflow.com/questions/16747798/delete-duplicate-elements-from-an-array
 		dataKeys = dataKeys.filter((d, i, self) => i === self.indexOf(d));
-		activeChart = dataKeys[0];
 
 	/*=================
 	=== Add labels to our dropdown
@@ -135,12 +129,10 @@ function onload(err, doc) {
 			.attr('value', label => label)
 			.text(label => label);
 
-	function changeChart(d, i, node) {
-		// let value = d3.select('this').attr('value');
+	function changeChart() {
 		console.log(this.value);
 		activeChart = this.value;
-		render(useableData)
-		// console.log(this.getAttribute('value'))
+		renderCause(useableData);
 	}
 
 	/*=================
@@ -154,7 +146,6 @@ function onload(err, doc) {
 	// Used map before and that didn't seem to work no matter what
 	yScale.range([0, svgHeight])
 		.domain([maxDeaths, 0]);
-	// yScale.domain([0, maxDeaths]);
 	darkColors.domain([minDeaths, maxDeaths])
 
 	// Appending the x-axis
@@ -175,27 +166,22 @@ function onload(err, doc) {
 		.call(d3.axisLeft(yScale));
 
 
+	function renderCause(data) {
+		// filter on basis of what cause has been choses. Return All deaths on default
+		filteredData = data.filter(item => item.cause === (activeChart || dataKeys[0]));
 
-		// render the chart
-		render(useableData);
-
-	function render(data) {
-		let dataF = data.filter(item => item.cause === activeChart)
-		
-		// let chartBars = container.selectAll('.bar')
-			// .data(dataF);
 		let chartBars = container.selectAll('.bar')
-			.data(dataF)
+			.data(filteredData)
 			.enter()
 			.append('rect')
-			.attr('class', 'bar');
+				.attr('class', 'bar')
 
 		let transContainer = container.transition()
 			.duration(transDur);
 
 		// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
-		minDeaths = d3.min(dataF, data => data.deaths);
-		maxDeaths = d3.max(dataF, data => data.deaths);
+		minDeaths = d3.min(filteredData, data => data.deaths);
+		maxDeaths = d3.max(filteredData, data => data.deaths);
 		
 		// Update the domain of the yScale & colorScale
 		darkColors.domain([minDeaths, maxDeaths]);
@@ -203,17 +189,79 @@ function onload(err, doc) {
 
 
 		transContainer.select('.axis-y')
-			.call(d3.axisLeft(yScale))
+			.call(getYScale)
 			.selectAll('g');
 
 		transContainer.selectAll('.bar')
-				.attr('x', dataF => translateX + xScale(dataF.year))
-				.attr('y', dataF => yScale(dataF.deaths) - translateY)
-				// .attr('y', dataF => svgHeight - translateY - yScale(dataF.deaths))
-				.attr('width', dataF => xScale.bandwidth())
-				.attr('height', dataF => svgHeight - yScale(dataF.deaths))
-				.attr('fill', dataF => darkColors(dataF.deaths))
+			.attr('x', getX)
+			.attr('y', getY)
+			.attr('width', getWidth)
+			.attr('height', getHeight)
+			.attr('fill', getFill);
+	}
+	
+
+	// Render on first load
+	(function initialRender() {
+			filteredData = useableData.filter(item => item.cause === (activeChart || dataKeys[0]));
+
+			let chartBars = container.selectAll('.bar')
+				.data(filteredData)
+				.enter()
+				.append('rect')
+					.attr('class', 'bar')
+	
+			// It doesn't render without transition for some reason
+			// The data is already there too.
+			// settimeout doesn't work
+			let transContainer = container.transition()
+				.duration(0);
+	
+			// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
+			minDeaths = d3.min(filteredData, data => data.deaths);
+			maxDeaths = d3.max(filteredData, data => data.deaths);
+			
+			// Update the domain of the yScale & colorScale
+			darkColors.domain([minDeaths, maxDeaths]);
+			yScale.domain([maxDeaths, 0]);
+	
+			transContainer.select('.axis-y')
+				.call(getYScale)
+				.selectAll('g');
+	
+			transContainer.selectAll('.bar')
+				.attr('x', getX)
+				.attr('y', getY)
+				.attr('width', getWidth)
+				.attr('height', getHeight)
+				.attr('fill', getFill);
+	})()
+
+	function getX(d) {
+		return translateX + xScale(d.year);
 	}
 
+	function getY(d) {
+		return yScale(d.deaths) - translateY;
+	}
+
+	function getWidth() {
+		return xScale.bandwidth();
+	}
+
+	function getHeight(d) {
+		return svgHeight - yScale(d.deaths);
+	}
+
+	function getFill(d) {
+		return darkColors(d.deaths);
+	}
+
+	function getYScale() {
+		return d3.axisLeft(yScale);
+	}
+	
+
+	
 }
 
