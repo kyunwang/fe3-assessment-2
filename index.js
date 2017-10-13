@@ -1,7 +1,8 @@
 var ourData;
 var useableData = [];
 var filteredData;
-var dataKeys = [];
+var causeKeys = [];
+var yearKeys = [];
 var activeChart;
 
 d3.text('data.csv')
@@ -36,7 +37,7 @@ const xScale = d3.scaleBand()
 	.padding(0.2);
 const yScale = d3.scaleLinear();
 const darkColors = d3.scaleLinear()
-	.range([d3.rgb('#fff'), d3.rgb('#a7a165')]);
+	.range([d3.rgb('#fff'), d3.rgb('#4b4b4b')]);
 
 /*=================
 === Global variables 
@@ -98,32 +99,34 @@ const darkColors = d3.scaleLinear()
 				useableData.push({
 					cause: d.cause,
 					year: d.years[i],
-					deaths: d.deaths[i]
+					deaths: d.deaths[i],
 				});
 			}
 		});
 
 		// Filtering the keys to use
 		for(var i = 0; i < useableData.length; i++) {
-			dataKeys.push(useableData[i].cause);
+			causeKeys.push(useableData[i].cause);
+			yearKeys.push(useableData[i].year);
 		}
 
 		// Filter from : https://stackoverflow.com/questions/16747798/devare-duplicate-elements-from-an-array
-		dataKeys = dataKeys.filter((d, i, self) => i === self.indexOf(d));
+		causeKeys = causeKeys.filter((d, i, self) => i === self.indexOf(d));
+		yearKeys = yearKeys.filter((d, i, self) => i === self.indexOf(d));
 
 	/*=================
 	=== Add labels to our dropdown
 	=================*/
 		d3.select('#filter-list')
-			.on('change', changeChart)
+			.on('change', changeCause)
 			.selectAll('option')
-			.data(dataKeys)
+			.data(causeKeys)
 			.enter()
 			.append('option')
 				.attr('value', label => label)
 				.text(label => label);
 
-		function changeChart() {
+		function changeCause() {
 			activeChart = this.value;
 
 			// Add a transition on changing the cause - btw use style not .attr which does not work
@@ -133,9 +136,23 @@ const darkColors = d3.scaleLinear()
 				.transition()
 				.duration(transDur)
 				.style('opacity', 1)
-				.text(this.value)
+				.text(`${this.value} in The Netherlands`)
 
 			renderCause(useableData);
+		}
+
+		d3.select('#filter-year')
+			.on('change', changeYear)
+			.selectAll('option')
+			.data(yearKeys)
+			.enter()
+			.append('option')
+				.attr('value', label => label)
+				.text(label => label);
+
+		function changeYear() {
+			activeChart = parseInt(this.value, 10);
+			renderYear(useableData);
 		}
 
 	/*=================
@@ -146,7 +163,7 @@ const darkColors = d3.scaleLinear()
 		// Create a html p tag to show the label of the active graph
 		var labelCause = labelCon.append('p')
 			.attr('class', 'medium-text')
-			.text(dataKeys[0]);
+			.text(`${causeKeys[0]} in The Netherlands`);
 
 		// Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
 		var labelSvg = labelCon.append('svg');
@@ -195,7 +212,7 @@ const darkColors = d3.scaleLinear()
 		function handleMouseOut(d) {
 			labelCount.transition()
 				.duration(transDur)
-				.tween("text", function() { // Tween from https://bl.ocks.org/bricedev/a0c5ef180272fac3aea6
+				.tween("text", function() {
 					var i = d3.interpolate(d.deaths, 0); // interpolate from up to down
 					return t => d3.select(this).text(formatNumber(i(t)));
 				});
@@ -204,10 +221,8 @@ const darkColors = d3.scaleLinear()
 				.transition()
 				.duration(transDur)
 				.text(`IN ${d.year}`)
-				.style('opacity', 0)
+				.style('opacity', 0);
 		}
-
-
 
 	/*=================
 	=== Start chart
@@ -226,12 +241,7 @@ const darkColors = d3.scaleLinear()
 		var xAxis = container.append('g') // Set and create the x-axis at the bottom
 			.attr('class', 'axis axis-x')
 			.attr('transform', `translate(${translateX}, ${svgHeight})`)
-			.call(d3.axisBottom(xScale))
-			.selectAll("text") // Setting the labels
-			.attr("y", 15)
-			.attr("x", -12)
-			.attr("dy", ".35em")
-			.style("text-anchor", "start");
+			.call(d3.axisBottom(xScale));
 		
 		// Appending the y-axis
 		var yAxis = container.append('g') // Set and create the y-axis on the left
@@ -241,11 +251,13 @@ const darkColors = d3.scaleLinear()
 
 
 	/*=================
-	=== Render by filter
+	=== Render by filter : cause & year
 	=================*/
+
+		// Render by cause
 		function renderCause(data) {
 			// filter on basis of what cause has been choses. Return All deaths on default
-			filteredData = data.filter(item => item.cause === (activeChart || dataKeys[0]));
+			filteredData = data.filter(item => item.cause === (activeChart || causeKeys[0]));
 
 			var chartBars = container.selectAll('.bar')
 				.data(filteredData)
@@ -266,12 +278,20 @@ const darkColors = d3.scaleLinear()
 			// Update the domain of the yScale & colorScale
 			darkColors.domain([minDeaths, maxDeaths]);
 			yScale.domain([maxDeaths, 0]);
+			xScale.domain(useableData.map(d => d.year));
 
 			// Update the y-axis
 			transContainer.select('.axis-y')
-				.call(d3.axisLeft(yScale))
-				.selectAll('g');
+				.call(d3.axisLeft(yScale));
 
+			transContainer.select('.axis-x')
+				.call(d3.axisBottom(xScale))
+				.selectAll('text')
+				.attr("y", 15)
+				.attr("x", -12)
+				.attr("dy", ".35em")
+				.style("text-anchor", "start");
+				
 			// Updating the bar values
 			// First 'remove' the old values then add the new ones in place
 			transContainer.selectAll('.bar')
@@ -287,13 +307,71 @@ const darkColors = d3.scaleLinear()
 					.attr('height', getHeight)
 					.attr('fill', getFill);
 		}
+		
+
+		// Render by year
+		function renderYear(data) {
+			// filter on basis of what cause has been choses. Return All deaths on default
+			filteredData = data.filter(item => item.year === (activeChart || yearKeys[0]));
+			console.log(filteredData);
+			// filteredData = filteredData[filteredData.length - 1].pop;
+			filteredData.pop();
+			var chartBars = container.selectAll('.bar')
+				.data(filteredData)
+				.enter()
+				.append('rect')
+					.on('mouseenter', handleMouseOver)
+					.on('mouseleave', handleMouseOut)
+					.attr('class', 'bar');
+
+			// Creating a container for transitions
+			var transContainer = container.transition()
+				.duration(transDur);
+
+			// Get the min/max amounts of deaths. It is nested so we return another d3.min method which returns the desired value
+			minDeaths = d3.min(filteredData, data => data.deaths);
+			maxDeaths = d3.max(filteredData, data => data.deaths);
+			
+			// Update the domain of the yScale & colorScale
+			darkColors.domain([minDeaths, maxDeaths]);
+			yScale.domain([maxDeaths, 0]);
+			xScale.domain(filteredData.map(d => d.cause))
+
+			// Update the y-axis
+			transContainer.select('.axis-y')
+				.call(d3.axisLeft(yScale))
+				// .selectAll('g');
+
+			transContainer.select('.axis-x')
+				.call(d3.axisBottom(xScale))
+				.selectAll('text')
+				.attr('y', 0)
+				.attr('x', -12)
+				.attr('transform', 'rotate(-45)')
+				.style("text-anchor", "end");
+
+			// Updating the bar values
+			// First 'remove' the old values then add the new ones in place
+			transContainer.selectAll('.bar')
+				// Not adding for easier comparison
+				// .attr('height', 0)
+				// Need this to animate from up to down
+				// .attr('y', svgHeight)
+				.transition()
+				.duration(transDur)
+					.attr('x', getXy)
+					.attr('y', getY)
+					.attr('width', getWidth)
+					.attr('height', getHeight)
+					.attr('fill', getFill);
+		}
 	
 
 	/*=================
-	=== Render first load
+	=== Render first load (without transition)
 	=================*/
 		(function initialRender() {
-			filteredData = useableData.filter(item => item.cause === (activeChart || dataKeys[0]));
+			filteredData = useableData.filter(item => item.cause === (activeChart || causeKeys[0]));
 
 			var chartBars = container.selectAll('.bar')
 				.data(filteredData)
@@ -319,7 +397,6 @@ const darkColors = d3.scaleLinear()
 	
 			transContainer.select('.axis-y')
 				.call(getYScale)
-				.selectAll('g');
 	
 			transContainer.selectAll('.bar')
 				.attr('x', getX)
@@ -334,6 +411,10 @@ const darkColors = d3.scaleLinear()
 	=================*/
 		function getX(d) {
 			return translateX + xScale(d.year);
+		}
+
+		function getXy(d) {
+			return translateX + xScale(d.cause);
 		}
 
 		function getY(d) {
@@ -355,7 +436,5 @@ const darkColors = d3.scaleLinear()
 		function getYScale() {
 			return d3.axisLeft(yScale);
 		}
-
-
 	
 }
