@@ -37,7 +37,7 @@ const xScale = d3.scaleBand()
 	.padding(0.2);
 const yScale = d3.scaleLinear();
 const darkColors = d3.scaleLinear()
-	.range([d3.rgb('#fff'), d3.rgb('#4b4b4b')]);
+	.range([d3.rgb('#fff'), d3.rgb('#a3a3a3')]);
 
 /*=================
 === Global variables 
@@ -136,7 +136,7 @@ const darkColors = d3.scaleLinear()
 				.transition()
 				.duration(transDur)
 				.style('opacity', 1)
-				.text(`${this.value} in The Netherlands`)
+				.text(`${causeKeys[0]} in The Netherlands`)
 
 			renderCause(useableData);
 		}

@@ -84,6 +84,9 @@ The interactions are:
 	- [x] The counter
 	- [x] The filter
 
+- [ ] Set a inital year to *blank* in yearfilter
+- [ ] 
+
 <!-- - [ ] Select a specific year and cause to compare? -->
 
 
