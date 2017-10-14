@@ -76,17 +76,20 @@ The interactions are:
 - [`d3-format`](numberFormat)
 
 ## TODO
-- [ ] Filter on basis of what year
+- [x] Filter on basis of what year
 - [x] Filter on basis of what cause
 - [x] View a counter of the amounts of death
 - [x] Show data on mouseenter in the counter
 - [x] Basic styling
 	- [x] The counter
 	- [x] The filter
+- [ ] Show a option to show in percentages (maybe? probably ye)
 
 - [ ] Set a inital year to *blank* in yearfilter
 - [ ] Sometimes a color wouldn't come through
 - [ ] Clean the cause labels
+- [ ] Add filter label
+- [ ] Fix y-axis showing the worng labels on first render
 
 - [ ] Refactoring - awfull safari...
 
